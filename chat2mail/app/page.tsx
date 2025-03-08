@@ -1,42 +1,101 @@
+"use client"
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
-import { Mail } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Mail } from "lucide-react";
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-[#f5f5f4] dark:bg-[#1c1c1c] flex flex-col items-center justify-center p-4">
-      {/* Envelope Card */}
-      <Card className="relative w-full max-w-2xl aspect-[1.4/1] bg-white dark:bg-zinc-900 shadow-lg transform hover:scale-[1.02] transition-transform duration-300 overflow-hidden">
-        {/* Envelope Flap */}
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-50 to-white dark:from-zinc-800 dark:to-zinc-900 transform origin-bottom" 
-             style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}>
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-white/5" />
-        </div>
-        
-        {/* Content */}
-        <div className="relative h-full flex flex-col items-center justify-center pt-28 px-6 text-center z-10">
-          <Mail className="w-16 h-16 text-blue-500 mb-6 animate-bounce" />
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-            Chat2Mail
-          </h1>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-8 max-w-md">
-            Transform your conversations into perfectly crafted emails with AI-powered assistance
-          </p>
-          
-          <div className="flex gap-4 flex-col sm:flex-row">
-            <Button asChild variant="default" size="lg" className="min-w-[140px]">
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="min-w-[140px]">
-              <Link href="/register">Register</Link>
-            </Button>
+export default function LandingPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (session) {
+      router.push("/dashboard");
+    } else {
+      router.push("/register");
+    }
+  };
+
+  // Show loading state while session is being fetched
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <div className="relative h-40 w-40">
+          <Mail className="h-20 w-20 text-blue-500 animate-bounce" />
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
+            <div className="h-1 w-24 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
           </div>
         </div>
-      </Card>
+      </div>
+    );
+  }
 
-      {/* Paper texture overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiNmMGYwZjAiIG9wYWNpdHk9IjAuMyI+PC9wYXRoPgo8L3N2Zz4=')]" />
+  return (
+    <div className="flex min-h-screen flex-col">
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="relative h-40 w-40 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-1">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Mail className="h-20 w-20 text-white" />
+                </div>
+              </div>
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
+                Chat2Mail
+              </h1>
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+                Transform your email experience with AI-powered chat interface.
+                Simple, intuitive, and efficient communication.
+              </p>
+              <div className="space-x-4">
+                <Button
+                  onClick={handleGetStarted}
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
+                >
+                  {session ? "Go to Dashboard" : "Get Started"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-col items-center space-y-4 text-center">
+                <div className="rounded-full bg-blue-100 p-4 dark:bg-blue-900">
+                  <Mail className="h-6 w-6 text-blue-500 dark:text-blue-300" />
+                </div>
+                <h3 className="text-xl font-bold">Smart Inbox</h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  AI-powered email organization and prioritization
+                </p>
+              </div>
+              <div className="flex flex-col items-center space-y-4 text-center">
+                <div className="rounded-full bg-purple-100 p-4 dark:bg-purple-900">
+                  <Mail className="h-6 w-6 text-purple-500 dark:text-purple-300" />
+                </div>
+                <h3 className="text-xl font-bold">Chat Interface</h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Natural conversation-style email management
+                </p>
+              </div>
+              <div className="flex flex-col items-center space-y-4 text-center">
+                <div className="rounded-full bg-pink-100 p-4 dark:bg-pink-900">
+                  <Mail className="h-6 w-6 text-pink-500 dark:text-pink-300" />
+                </div>
+                <h3 className="text-xl font-bold">Quick Actions</h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Efficient email handling with smart suggestions
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
