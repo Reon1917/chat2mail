@@ -1,10 +1,12 @@
-import NextAuth, { type AuthOptions } from "next-auth";
-import type { DefaultSession, Account, Session, User } from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth";
+import type { DefaultSession, Account, Session, User, Profile } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+import type { AdapterUser } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
-import { db } from "@/db";
+import { drizzleDb } from "@/db";
+import { findUserByEmail } from "@/lib/db-utils";
 import { z } from "zod";
 
 // Extend the built-in session types
@@ -42,19 +44,8 @@ const credentialsSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-const config: AuthOptions = {
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
-  },
-  pages: {
-    signIn: "/login",
-    signOut: "/",
-    error: "/login",
-    verifyRequest: "/verify-request",
-    newUser: "/register"
-  },
+// Configure NextAuth options
+const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID!,
@@ -81,13 +72,8 @@ const config: AuthOptions = {
           // Validate credentials
           const { email, password } = credentialsSchema.parse(credentials);
 
-          // Find user using prepared statement
-          const users = await db.execute(
-            'SELECT id, email, password, name, image FROM users WHERE email = $1',
-            [email]
-          );
-
-          const user = users[0];
+          // Find user by email
+          const user = await findUserByEmail(email);
           if (!user?.password) {
             return null;
           }
@@ -132,7 +118,26 @@ const config: AuthOptions = {
       return session;
     },
   },
+  pages: {
+    signIn: "/login",
+    signOut: "/",
+    error: "/login",
+    verifyRequest: "/verify-request",
+    newUser: "/register"
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
   debug: process.env.NODE_ENV === "development",
 };
 
-export const { handlers: { GET, POST }, auth } = NextAuth(config);
+// Create the NextAuth handler
+const handler = NextAuth(authOptions);
+
+// Export the route handlers for GET and POST requests
+export { handler as GET, handler as POST };
+
+// Export auth for use in server components
+export const auth = handler.auth;

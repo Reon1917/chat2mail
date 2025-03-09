@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { FormEvent, useState } from "react";
 import { Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,15 +26,13 @@ export default function LoginPage() {
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/dashboard",
         redirect: false,
       });
-
+      
       if (result?.error) {
         setError("Invalid email or password");
-        console.error(result.error);
-      } else if (result?.url) {
-        window.location.href = result.url;
+      } else {
+        router.push("/dashboard");
       }
     } catch (error) {
       setError("An unexpected error occurred");

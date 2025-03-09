@@ -1,101 +1,118 @@
-"use client"
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Mail } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { Mail, Sparkles, ArrowRight, CheckCircle } from "lucide-react";
 
-export default function LandingPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  const handleGetStarted = () => {
-    if (session) {
-      router.push("/dashboard");
-    } else {
-      router.push("/register");
-    }
-  };
-
-  // Show loading state while session is being fetched
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <div className="relative h-40 w-40">
-          <Mail className="h-20 w-20 text-blue-500 animate-bounce" />
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
-            <div className="h-1 w-24 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950 dark:via-purple-950 dark:to-pink-950">
+      <SiteHeader />
+      
+      <main className="container relative flex flex-col items-center justify-center py-24 md:py-32">
+        {/* Hero Section */}
+        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
+          <div className="mb-4 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-900/90 px-4 py-1 text-sm font-medium text-indigo-700 dark:text-indigo-300 shadow-sm backdrop-blur">
+            <Sparkles className="mr-1 h-3.5 w-3.5" />
+            <span>Powered by Gemini AI</span>
+          </div>
+          
+          <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tighter md:text-6xl">
+            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Write Professional Emails
+            </span>
+            <br />
+            <span className="text-gray-900 dark:text-gray-100">
+              in Seconds with AI
+            </span>
+          </h1>
+          
+          <p className="mb-8 max-w-[42rem] text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
+            Chat2Mail helps you craft perfect emails for any situation. 
+            Save time and communicate more effectively with our AI-powered email assistant.
+          </p>
+          
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Button asChild size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+              <Link href="/dashboard">
+                <Mail className="mr-2 h-4 w-4" />
+                Try Chat2Mail Now
+              </Link>
+            </Button>
+            
+            <Button asChild variant="outline" size="lg" className="border-indigo-200 hover:border-indigo-400 dark:border-indigo-800 dark:hover:border-indigo-600">
+              <Link href="/register">
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Sign Up Free
+              </Link>
+            </Button>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex min-h-screen flex-col">
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="relative h-40 w-40 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-1">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Mail className="h-20 w-20 text-white" />
-                </div>
+        
+        {/* Features Section */}
+        <div className="mt-24 w-full max-w-5xl">
+          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Why Choose <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Chat2Mail</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {/* Feature 1 */}
+            <div className="rounded-xl bg-white/80 dark:bg-gray-800/80 p-6 shadow-lg backdrop-blur-sm border-0">
+              <div className="mb-4 rounded-full bg-indigo-100 dark:bg-indigo-900/50 p-2 w-fit">
+                <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                Chat2Mail
-              </h1>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                Transform your email experience with AI-powered chat interface.
-                Simple, intuitive, and efficient communication.
+              <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-gray-100">AI-Powered</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Leverages Gemini AI to generate professional, context-aware emails in seconds.
               </p>
-              <div className="space-x-4">
-                <Button
-                  onClick={handleGetStarted}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
-                >
-                  {session ? "Go to Dashboard" : "Get Started"}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+            </div>
+            
+            {/* Feature 2 */}
+            <div className="rounded-xl bg-white/80 dark:bg-gray-800/80 p-6 shadow-lg backdrop-blur-sm border-0">
+              <div className="mb-4 rounded-full bg-purple-100 dark:bg-purple-900/50 p-2 w-fit">
+                <CheckCircle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
+              <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-gray-100">Time-Saving</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Reduce email writing time by up to 80% with our intuitive interface and smart suggestions.
+              </p>
+            </div>
+            
+            {/* Feature 3 */}
+            <div className="rounded-xl bg-white/80 dark:bg-gray-800/80 p-6 shadow-lg backdrop-blur-sm border-0">
+              <div className="mb-4 rounded-full bg-pink-100 dark:bg-pink-900/50 p-2 w-fit">
+                <Mail className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-gray-100">Professional</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Ensure your emails are always well-structured, error-free, and professionally formatted.
+              </p>
             </div>
           </div>
-        </section>
-
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <div className="rounded-full bg-blue-100 p-4 dark:bg-blue-900">
-                  <Mail className="h-6 w-6 text-blue-500 dark:text-blue-300" />
-                </div>
-                <h3 className="text-xl font-bold">Smart Inbox</h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  AI-powered email organization and prioritization
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <div className="rounded-full bg-purple-100 p-4 dark:bg-purple-900">
-                  <Mail className="h-6 w-6 text-purple-500 dark:text-purple-300" />
-                </div>
-                <h3 className="text-xl font-bold">Chat Interface</h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Natural conversation-style email management
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <div className="rounded-full bg-pink-100 p-4 dark:bg-pink-900">
-                  <Mail className="h-6 w-6 text-pink-500 dark:text-pink-300" />
-                </div>
-                <h3 className="text-xl font-bold">Quick Actions</h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Efficient email handling with smart suggestions
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
+      
+      {/* Footer */}
+      <footer className="border-t border-indigo-100 dark:border-indigo-900 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm py-6">
+        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-indigo-500" />
+            <span className="font-medium text-gray-900 dark:text-gray-100">Chat2Mail</span>
+          </div>
+          
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            &copy; {new Date().getFullYear()} Chat2Mail. All rights reserved.
+          </p>
+          
+          <div className="flex gap-4">
+            <Link href="/terms" className="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
+              Terms
+            </Link>
+            <Link href="/privacy" className="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
+              Privacy
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
