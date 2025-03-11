@@ -27,6 +27,13 @@ const generationConfig = {
   responseMimeType: "text/plain",
 };
 
+// Token usage interface
+interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse the request body
@@ -56,7 +63,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'API key not configured', 
-          fallbackEmail: generateFallbackEmail(sender, senderTitle, receiver, receiverTitle, subject) 
+          fallbackEmail: generateFallbackEmail(sender, senderTitle, receiver, receiverTitle, subject),
+          tokenUsage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
         },
         { status: 500 }
       );
@@ -89,10 +97,36 @@ Length: ${length}`
     const result = await chatSession.sendMessage("Please format the email as plain text, not JSON. Start with the greeting and end with the signature. The email should be well-structured with proper paragraphs and formatting.");
     const emailText = result.response.text();
     
+    // Log the full response for debugging
+    console.log('Gemini API response structure:', JSON.stringify({
+      promptFeedback: result.response.promptFeedback,
+      candidates: result.response.candidates && result.response.candidates.length > 0 ? 
+        { tokenCount: result.response.candidates[0].tokenCount } : 'No candidates'
+    }, null, 2));
+    
+    // Get token usage from the response
+    // For Gemini 2.0 Flash, the token count structure might be different than expected
+    // Using hardcoded estimates if the API doesn't return token counts
+    const estimatedInputTokens = Math.ceil((subject.length + sender.length + receiver.length + (additionalContext?.length || 0)) / 4);
+    const estimatedOutputTokens = Math.ceil(emailText.length / 4);
+    
+    const tokenUsage: TokenUsage = {
+      inputTokens: result.response.promptFeedback?.tokenCount?.totalTokens || estimatedInputTokens,
+      outputTokens: result.response.candidates?.[0]?.tokenCount || estimatedOutputTokens,
+      totalTokens: (result.response.promptFeedback?.tokenCount?.totalTokens || estimatedInputTokens) + 
+                  (result.response.candidates?.[0]?.tokenCount || estimatedOutputTokens)
+    };
+    
+    // Log token usage for debugging
+    console.log('Token usage data:', tokenUsage);
+    
     // Clean up the response if needed (remove any JSON formatting, code blocks, etc.)
     const cleanedEmail = cleanEmailResponse(emailText);
     
-    return NextResponse.json({ email: cleanedEmail });
+    return NextResponse.json({ 
+      email: cleanedEmail,
+      tokenUsage
+    });
   } catch (error) {
     console.error('Error generating email with Gemini AI:', error);
     
@@ -102,7 +136,8 @@ Length: ${length}`
     return NextResponse.json(
       { 
         error: 'Failed to generate email', 
-        fallbackEmail: generateFallbackEmail(sender, senderTitle, receiver, receiverTitle, subject) 
+        fallbackEmail: generateFallbackEmail(sender, senderTitle, receiver, receiverTitle, subject),
+        tokenUsage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
       },
       { status: 500 }
     );

@@ -290,3 +290,56 @@ You can obtain a Gemini API key from the Google AI Studio (https://makersuite.go
 3. Create a `.env.local` file in the root of your project
 4. Add the GEMINI_API_KEY variable with your API key
 5. Restart your development server
+
+## March 11, 2025 - User Profile Display and Token Usage Metrics
+
+### Implemented Features
+
+1. **Enhanced User Profile Display**:
+   - Improved the user name handling in the site header to properly format and display names in various formats
+   - Added better capitalization and formatting for user names in the dropdown menu
+   - Fixed issues with displaying full names that were in incorrect formats
+   - Added truncation to prevent overflow of long names
+
+2. **Token Usage Metrics**:
+   - Created a modular `TokenUsageDisplay` component to visualize token usage metrics
+   - Updated the API route to track and return token usage data from Gemini AI
+   - Implemented input, output, and total token count display with a progress bar
+   - Added tooltips to explain token usage to users
+   - Made the token metrics display conditionally visible and easily removable
+
+### Technical Implementation Details
+
+1. **User Profile Display**:
+   - Enhanced the `getDisplayName` function to handle different name formats (first last, first middle last, etc.)
+   - Added a `formatFullName` function to properly capitalize each word in the user's name
+   - Added truncation to prevent UI issues with very long names
+
+2. **Token Usage Metrics**:
+   - Created a reusable `TokenUsageDisplay` component that can be easily integrated or removed
+   - Added token usage tracking in the `/api/generate-email` API route
+   - Implemented proper error handling and fallback for token metrics when the AI service is unavailable
+   - Used Tailwind CSS for styling to maintain consistency with the rest of the application
+
+### Next Steps
+
+1. **User Profile Enhancements**:
+   - Add ability for users to edit their profile information
+   - Implement profile picture upload functionality
+   - Add name format validation during registration
+
+2. **Token Usage Analytics**:
+   - Implement server-side storage of token usage for analytics
+   - Add a dashboard for admins to monitor overall token usage
+   - Implement user-specific token limits and quotas
+
+3. **Email Generation Improvements**:
+   - Add more customization options for email generation
+   - Implement email templates for common scenarios
+   - Add ability to save and reuse generated emails
+
+### Bug Fixes
+
+1. Fixed user profile display issues in the site header
+2. Resolved issues with improperly formatted names being displayed incorrectly
+3. Fixed import errors in the token usage display component

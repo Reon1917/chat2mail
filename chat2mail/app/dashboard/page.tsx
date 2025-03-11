@@ -14,6 +14,7 @@ import { Mail, Send, Sparkles, Copy, RefreshCw, ArrowRight, AlertCircle } from "
 import { SiteHeader } from "@/components/site-header";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { TokenUsageDisplay } from "@/components/token-usage-display";
 
 type FormData = {
   sender: string;
@@ -24,6 +25,12 @@ type FormData = {
   tone: 'formal' | 'casual' | 'friendly' | 'professional';
   length: 'short' | 'medium' | 'long';
   additionalContext: string;
+};
+
+type TokenUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
 };
 
 export default function Dashboard() {
@@ -50,6 +57,8 @@ export default function Dashboard() {
   const [emailContent, setEmailContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tokenUsage, setTokenUsage] = useState<TokenUsage>({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
+  const [showTokenMetrics, setShowTokenMetrics] = useState(true); // Can be toggled if needed
 
   // Loading and error states handled by loading.tsx and error.tsx
   if (!session) return null;
@@ -78,12 +87,15 @@ export default function Dashboard() {
       });
       
       const data = await response.json();
+      console.log('API Response:', data); // Debug log to see what's coming back
       
       if (!response.ok) {
         // Handle API errors
         if (data.fallbackEmail) {
           // Use fallback email if available
           setEmailContent(data.fallbackEmail);
+          // Reset token usage when using fallback
+          setTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
           toast({
             title: "Using fallback email template",
             description: data.error || "Could not connect to AI service",
@@ -96,6 +108,13 @@ export default function Dashboard() {
       } else {
         // Set the generated email content
         setEmailContent(data.email);
+        // Update token usage metrics
+        if (data.tokenUsage) {
+          console.log('Token usage data:', data.tokenUsage); // Debug log for token usage
+          setTokenUsage(data.tokenUsage);
+        } else {
+          console.warn('No token usage data in response');
+        }
         toast({
           title: "Email generated successfully",
           description: "Your AI-powered email is ready to use!",
@@ -104,6 +123,8 @@ export default function Dashboard() {
     } catch (err) {
       console.error('Error generating email:', err);
       setError('Failed to generate email. Please try again.');
+      // Reset token usage on error
+      setTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
       toast({
         title: "Error",
         description: "Failed to generate email. Please try again.",
@@ -120,6 +141,11 @@ export default function Dashboard() {
       title: "Copied to clipboard",
       description: "Email content has been copied to your clipboard.",
     });
+  };
+
+  // Toggle token metrics display (optional feature for future use)
+  const toggleTokenMetrics = () => {
+    setShowTokenMetrics(prev => !prev);
   };
 
   return (
@@ -282,6 +308,16 @@ export default function Dashboard() {
                     </>
                   )}
                 </Button>
+                
+                {/* Token Usage Display - Only show when there's data and showTokenMetrics is true */}
+                {showTokenMetrics && tokenUsage.totalTokens > 0 && (
+                  <TokenUsageDisplay 
+                    inputTokens={tokenUsage.inputTokens}
+                    outputTokens={tokenUsage.outputTokens}
+                    totalTokens={tokenUsage.totalTokens}
+                    className="mt-4"
+                  />
+                )}
               </div>
             </Card>
             
@@ -332,7 +368,7 @@ export default function Dashboard() {
                     </p>
                     <div className="mt-4 flex items-center text-sm text-purple-500 dark:text-purple-400">
                       <ArrowRight className="h-4 w-4 mr-1" />
-                      <span>Powered by Gemini Flash 2.0</span>
+                      <span>Your email will appear here</span>
                     </div>
                   </div>
                 )}

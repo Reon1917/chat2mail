@@ -19,11 +19,37 @@ export function SiteHeader() {
   const pathname = usePathname();
   const isLoading = status === "loading";
   
-  // Get first name only for display
+  // Enhanced display name function to handle various name formats
   const getDisplayName = () => {
-    if (!session?.user?.name) return null;
-    // Only show first name for display in the button
-    return session.user.name.split(' ')[0]; 
+    if (!session?.user?.name) {
+      return session?.user?.email?.split('@')[0] || "User";
+    }
+    
+    // Handle different name formats (first last, first middle last, etc.)
+    const nameParts = session.user.name.trim().split(/\s+/);
+    if (nameParts.length === 0) {
+      return session?.user?.email?.split('@')[0] || "User";
+    }
+    
+    // Just return the first part of the name (first name) with proper capitalization
+    return nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1).toLowerCase();
+  };
+  
+  // Format full name for dropdown display
+  const formatFullName = () => {
+    if (!session?.user?.name) {
+      return session?.user?.email?.split('@')[0] || "User";
+    }
+    
+    const name = session.user.name.trim();
+    if (!name) {
+      return session?.user?.email?.split('@')[0] || "User";
+    }
+    
+    // Capitalize each word in the name
+    return name.split(/\s+/).map(part => 
+      part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    ).join(' ');
   };
   
   return (
@@ -65,27 +91,40 @@ export function SiteHeader() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="rounded-full px-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/40 dark:to-purple-900/40 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/60 dark:hover:to-purple-900/60 min-w-[40px] flex justify-start"
+                  className="rounded-full h-9 px-3 py-2 bg-white/80 dark:bg-gray-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex items-center gap-2"
                 >
                   {session.user?.image ? (
                     <img 
                       src={session.user.image} 
                       alt={session.user.name || "User"} 
-                      className="h-6 w-6 rounded-full object-cover mr-2 flex-shrink-0"
+                      className="h-7 w-7 rounded-full object-cover flex-shrink-0"
                     />
                   ) : (
-                    <User className="h-4 w-4 mr-2 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
                   )}
-                  <span className="font-medium text-sm text-gray-800 dark:text-gray-200 max-w-[120px] truncate overflow-hidden">
-                    {getDisplayName() || session.user?.email?.split('@')[0] || "User"}
+                  <span className="font-medium text-sm text-gray-800 dark:text-gray-200 max-w-[100px] truncate">
+                    {getDisplayName()}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 border-indigo-100 dark:border-indigo-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur">
                 <div className="flex items-center justify-start gap-2 p-2">
+                  {session.user?.image ? (
+                    <img 
+                      src={session.user.image} 
+                      alt={session.user.name || "User"} 
+                      className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                  )}
                   <div className="flex flex-col space-y-1 leading-none">
                     {session.user?.name && (
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{session.user.name}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{formatFullName()}</p>
                     )}
                     {session.user?.email && (
                       <p className="w-[200px] truncate text-sm text-gray-500 dark:text-gray-400">
