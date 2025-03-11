@@ -14,7 +14,6 @@ type TokenUsageProps = {
   inputTokens: number;
   outputTokens: number;
   totalTokens: number;
-  maxTokens?: number;
   className?: string;
 };
 
@@ -22,12 +21,8 @@ export function TokenUsageDisplay({
   inputTokens,
   outputTokens,
   totalTokens,
-  maxTokens = 32000, // Default max tokens for Gemini Flash 2.0
   className,
 }: TokenUsageProps) {
-  // Calculate percentages for progress bar
-  const usagePercentage = Math.min(Math.round((totalTokens / maxTokens) * 100), 100);
-  
   return (
     <Card className={`p-4 border-0 shadow-sm bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm ${className}`}>
       <div className="space-y-3">
@@ -46,11 +41,16 @@ export function TokenUsageDisplay({
             </TooltipProvider>
           </h4>
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-            {totalTokens.toLocaleString()} / {maxTokens.toLocaleString()}
+            {totalTokens.toLocaleString()}
           </span>
         </div>
         
-        <Progress value={usagePercentage} className="h-2" />
+        <Progress value={100} className="h-2 bg-gray-100 dark:bg-gray-700">
+          <div 
+            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500" 
+            style={{ width: '100%' }}
+          />
+        </Progress>
         
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>

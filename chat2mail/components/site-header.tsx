@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Mail, User, LogOut, LogIn, Home, LayoutDashboard } from "lucide-react";
+import { Mail, LogOut, LogIn, Home, LayoutDashboard } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -19,37 +18,16 @@ export function SiteHeader() {
   const pathname = usePathname();
   const isLoading = status === "loading";
   
-  // Enhanced display name function to handle various name formats
+  // Simplified display name function
   const getDisplayName = () => {
     if (!session?.user?.name) {
       return session?.user?.email?.split('@')[0] || "User";
     }
     
-    // Handle different name formats (first last, first middle last, etc.)
-    const nameParts = session.user.name.trim().split(/\s+/);
-    if (nameParts.length === 0) {
-      return session?.user?.email?.split('@')[0] || "User";
-    }
-    
-    // Just return the first part of the name (first name) with proper capitalization
-    return nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1).toLowerCase();
-  };
-  
-  // Format full name for dropdown display
-  const formatFullName = () => {
-    if (!session?.user?.name) {
-      return session?.user?.email?.split('@')[0] || "User";
-    }
-    
-    const name = session.user.name.trim();
-    if (!name) {
-      return session?.user?.email?.split('@')[0] || "User";
-    }
-    
-    // Capitalize each word in the name
-    return name.split(/\s+/).map(part => 
-      part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-    ).join(' ');
+    // Just return the full name with proper capitalization
+    return session.user.name.split(' ')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
   };
   
   return (
@@ -90,63 +68,15 @@ export function SiteHeader() {
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size="sm" 
-                  className="rounded-full h-9 px-3 py-2 bg-white/80 dark:bg-gray-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex items-center gap-2"
+                  size="sm"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
                 >
-                  {session.user?.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "User"} 
-                      className="h-7 w-7 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-white" />
-                    </div>
-                  )}
-                  <span className="font-medium text-sm text-gray-800 dark:text-gray-200 max-w-[100px] truncate">
-                    {getDisplayName()}
-                  </span>
+                  {getDisplayName()}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 border-indigo-100 dark:border-indigo-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  {session.user?.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "User"} 
-                      className="h-10 w-10 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                  <div className="flex flex-col space-y-1 leading-none">
-                    {session.user?.name && (
-                      <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{formatFullName()}</p>
-                    )}
-                    {session.user?.email && (
-                      <p className="w-[200px] truncate text-sm text-gray-500 dark:text-gray-400">
-                        {session.user.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <DropdownMenuSeparator className="bg-indigo-100 dark:bg-indigo-800" />
-                <DropdownMenuItem asChild className="text-gray-700 dark:text-gray-300 focus:bg-indigo-50 dark:focus:bg-indigo-900/50 focus:text-indigo-700 dark:focus:text-indigo-300">
-                  <Link href="/profile" className="w-full cursor-pointer">
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="text-gray-700 dark:text-gray-300 focus:bg-indigo-50 dark:focus:bg-indigo-900/50 focus:text-indigo-700 dark:focus:text-indigo-300">
-                  <Link href="/settings" className="w-full cursor-pointer">
-                    Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-indigo-100 dark:bg-indigo-800" />
+              <DropdownMenuContent align="end" className="w-40 border-indigo-100 dark:border-indigo-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur">
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-500 focus:bg-red-50 dark:focus:bg-red-900/30 focus:text-red-600 dark:focus:text-red-400"
+                  className="cursor-pointer flex items-center text-red-500 focus:bg-red-50 dark:focus:bg-red-900/30 focus:text-red-600 dark:focus:text-red-400"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

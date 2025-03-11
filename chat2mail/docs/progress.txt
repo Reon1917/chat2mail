@@ -343,3 +343,98 @@ You can obtain a Gemini API key from the Google AI Studio (https://makersuite.go
 1. Fixed user profile display issues in the site header
 2. Resolved issues with improperly formatted names being displayed incorrectly
 3. Fixed import errors in the token usage display component
+
+## March 11, 2025 - Continued Improvements and Email Templates Planning
+
+### Recent Improvements
+
+1. **User Profile Display Fixes**:
+   - Simplified the user profile button in the site header for better visual appearance
+   - Fixed capitalization of user names in the dropdown menu
+   - Improved avatar display and fallback for users without profile images
+   - Enhanced the dropdown menu layout for better readability
+
+2. **Token Usage Metrics**:
+   - Implemented fallback token count estimation when the Gemini API doesn't return token counts
+   - Added detailed logging to help debug token usage data
+   - Simplified the token usage display by removing the 32k limit reference
+   - Updated the progress bar to use a gradient design for better visual appeal
+
+### Email Templates Implementation Planning
+
+#### Approach 1: Basic Template Selection (Simple)
+
+**Implementation**:
+- Create a set of predefined email templates for common scenarios (e.g., job application, meeting request, thank you note)
+- Add a template selection dropdown to the email generation form
+- When a template is selected, prefill the subject and additional context fields
+- Use the selected template as a prompt modifier for the AI generation
+
+**Components Needed**:
+- `EmailTemplateSelector` component with dropdown of available templates
+- `templates.ts` file containing template definitions
+- Updates to the API route to incorporate template information in the prompt
+
+**User Experience**:
+- User selects a template from a dropdown
+- Form fields are prefilled based on the template
+- User can modify the prefilled content before generating the email
+- AI generates an email following the template style
+
+#### Approach 2: Custom Templates with Saving (Intermediate)
+
+**Implementation**:
+- Allow users to save their generated emails as templates
+- Create a template management page where users can view, edit, and delete their templates
+- Implement database storage for user-specific templates
+- Add ability to share templates with other users
+
+**Components Needed**:
+- `SaveAsTemplate` button in the email generation page
+- `TemplateManagementPage` for CRUD operations on templates
+- Database schema updates to store templates
+- API routes for template management
+
+**User Experience**:
+- User generates an email and can save it as a template with a name and category
+- User can browse their saved templates and apply them to new emails
+- User can share templates with colleagues
+
+#### Approach 3: Advanced Template System with Variables (Complex)
+
+**Implementation**:
+- Create a template language with variables (e.g., {{sender}}, {{receiver}}, {{custom_field}})
+- Build a template editor with live preview
+- Allow for conditional sections in templates based on input fields
+- Implement template versioning and analytics
+
+**Components Needed**:
+- Rich template editor with syntax highlighting
+- Template parser to handle variables and conditional logic
+- Template testing tool to validate templates
+- Analytics dashboard for template usage
+
+**User Experience**:
+- Power users can create complex templates with variables and conditional sections
+- Templates can adapt to different scenarios based on input
+- Users can track which templates perform best for different purposes
+
+### Next Steps
+
+1. **Immediate Implementation**:
+   - Start with Approach 1 (Basic Template Selection)
+   - Create 5-10 common email templates for different scenarios
+   - Implement the template selector component
+   - Update the API route to incorporate template guidance
+
+2. **Future Enhancements**:
+   - Add template categories for better organization
+   - Implement user feedback on templates (rating system)
+   - Consider moving to Approach 2 once basic templates are working well
+   - Research user needs for more advanced template features
+
+3. **Technical Considerations**:
+   - Ensure templates work well with the Gemini API
+   - Consider performance implications of template processing
+   - Design database schema to support future template features
+   - Implement proper validation for template inputs
