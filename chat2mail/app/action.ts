@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/db";
+import { userExists, createUser } from "@/lib/db-utils";
 import { hash } from "bcryptjs";
 
 interface DbUser {
@@ -21,30 +21,24 @@ export async function registerUser(email: string, password: string) {
       throw new Error("Password must be at least 8 characters long");
     }
 
-    // Check for existing user using prepared statement
-    const existingUsers = await db.execute(
-      'SELECT * FROM users WHERE email = $1',
-      [email]
-    );
-    
-    if (existingUsers && existingUsers.length > 0) {
+    // Check for existing user
+    const exists = await userExists(email);
+    if (exists) {
       throw new Error("Email already in use");
     }
 
     // Hash password
     const hashedPassword = await hash(password, 10);
+    
+    // Generate a name from email (username part)
+    const name = email.split('@')[0];
 
-    // Create user using prepared statement
-    const result = await db.execute(
-      'INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING id, email, name',
-      [email, hashedPassword, email.split('@')[0]]
-    );
-
-    if (!result || result.length === 0) {
+    // Create user
+    const newUser = await createUser(email, hashedPassword, name);
+    if (!newUser) {
       throw new Error("Failed to create user");
     }
 
-    const newUser = result[0];
     return { success: true, email: newUser.email };
   } catch (error) {
     console.error("Registration error:", error);
