@@ -8,15 +8,15 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950 dark:via-purple-950 dark:to-pink-950">
       <SiteHeader />
       
-      <main className="container relative flex flex-col items-center justify-center py-24 md:py-32">
+      <main className="container mx-auto px-4 relative flex flex-col items-center justify-center py-12 md:py-24">
         {/* Hero Section */}
-        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
+        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center">
           <div className="mb-4 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-900/90 px-4 py-1 text-sm font-medium text-indigo-700 dark:text-indigo-300 shadow-sm backdrop-blur">
             <Sparkles className="mr-1 h-3.5 w-3.5" />
             <span>Powered by Gemini AI</span>
           </div>
           
-          <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tighter md:text-6xl">
+          <h1 className="mb-6 text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:text-6xl">
             <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Write Professional Emails
             </span>
@@ -49,12 +49,12 @@ export default function Home() {
         </div>
         
         {/* Features Section */}
-        <div className="mt-24 w-full max-w-5xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
+        <div className="mt-16 md:mt-24 w-full max-w-4xl">
+          <h2 className="mb-8 md:mb-12 text-center text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
             Why Choose <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Chat2Mail</span>
           </h2>
           
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-3">
             {/* Feature 1 */}
             <div className="rounded-xl bg-white/80 dark:bg-gray-800/80 p-6 shadow-lg backdrop-blur-sm border-0">
               <div className="mb-4 rounded-full bg-indigo-100 dark:bg-indigo-900/50 p-2 w-fit">
@@ -93,7 +93,7 @@ export default function Home() {
       
       {/* Footer */}
       <footer className="border-t border-indigo-100 dark:border-indigo-900 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
+        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-indigo-500" />
             <span className="font-medium text-gray-900 dark:text-gray-100">Chat2Mail</span>
