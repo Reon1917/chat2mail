@@ -10,11 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Send, Sparkles, Copy, RefreshCw, AlertCircle } from "lucide-react";
+import { Mail, Send, Sparkles, Copy, RefreshCw, AlertCircle, FileText, Clock } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { TokenUsageDisplay } from "@/components/token-usage-display";
+import { TemplateSelector } from "@/components/email/template-selector";
+import { ToneAnalyzer } from "@/components/email/tone-analyzer";
+import { FollowUpReminder } from "@/components/email/follow-up-reminder";
 
 type FormData = {
   sender: string;
@@ -59,6 +62,8 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [tokenUsage, setTokenUsage] = useState<TokenUsage>({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
   const [showTokenMetrics, setShowTokenMetrics] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showReminders, setShowReminders] = useState(false);
 
   // Loading and error states handled by loading.tsx and error.tsx
   if (!session) return null;
@@ -141,6 +146,71 @@ export default function Dashboard() {
       title: "Copied to clipboard",
       description: "Email content has been copied to your clipboard.",
     });
+  };
+
+  // Handle template application
+  const handleApplyTemplate = (content: string, subject?: string, recipient?: string) => {
+    setEmailContent(content);
+    if (subject) {
+      setFormData(prev => ({
+        ...prev,
+        subject: subject
+      }));
+    }
+    if (recipient) {
+      setFormData(prev => ({
+        ...prev,
+        receiver: recipient
+      }));
+    }
+    setShowTemplates(false);
+  };
+
+  // Handle tone suggestion application
+  const handleApplySuggestion = (suggestion: string) => {
+    if (!emailContent) return;
+    
+    // This is a simplified implementation
+    // In a real app, this would use more sophisticated logic to apply the suggestion
+    if (suggestion.includes('shorter sentences')) {
+      // Example: break long sentences by adding periods
+      const sentences = emailContent.split('. ');
+      if (sentences.length > 1) {
+        const longestSentenceIndex = sentences.reduce(
+          (maxIndex, sentence, index, arr) => 
+            sentence.length > arr[maxIndex].length ? index : maxIndex, 
+          0
+        );
+        
+        if (sentences[longestSentenceIndex].length > 100) {
+          const longSentence = sentences[longestSentenceIndex];
+          const midpoint = Math.floor(longSentence.length / 2);
+          const breakPoint = longSentence.indexOf(' ', midpoint);
+          
+          if (breakPoint !== -1) {
+            const firstHalf = longSentence.substring(0, breakPoint);
+            const secondHalf = longSentence.substring(breakPoint + 1);
+            sentences[longestSentenceIndex] = firstHalf + '. ' + secondHalf;
+            setEmailContent(sentences.join('. '));
+          }
+        }
+      }
+    } else {
+      // For other suggestions, just append a note to the email for demonstration
+      toast({
+        title: "Suggestion Applied",
+        description: `Applied: ${suggestion}`,
+      });
+    }
+  };
+
+  // Handle token usage updates from tone analyzer
+  const handleTokenUsageUpdate = (inputTokens: number, outputTokens: number) => {
+    setTokenUsage(prev => ({
+      inputTokens: prev.inputTokens + inputTokens,
+      outputTokens: prev.outputTokens + outputTokens,
+      totalTokens: prev.totalTokens + inputTokens + outputTokens
+    }));
   };
 
   return (
@@ -292,23 +362,33 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleGenerateEmail} 
-                  disabled={isGenerating || !formData.subject || !formData.sender || !formData.receiver}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white h-11 text-base"
-                >
-                  {isGenerating ? (
-                    <>
-                      <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
-                      Writing your email...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-5 w-5" />
-                      Write Email
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleGenerateEmail} 
+                    disabled={isGenerating || !formData.subject || !formData.sender || !formData.receiver}
+                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white h-11 text-base"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+                        Writing your email...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-5 w-5" />
+                        Write Email
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowTemplates(!showTemplates)}
+                    className="h-11"
+                  >
+                    <FileText className="h-5 w-5" />
+                  </Button>
+                </div>
 
                 {tokenUsage.totalTokens > 0 && (
                   <div className="pt-2">
@@ -331,6 +411,16 @@ export default function Dashboard() {
                     )}
                   </div>
                 )}
+                
+                {/* Template Selector */}
+                {showTemplates && (
+                  <Card className="p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <TemplateSelector 
+                      onApplyTemplate={handleApplyTemplate}
+                      onClose={() => setShowTemplates(false)}
+                    />
+                  </Card>
+                )}
               </div>
             </Card>
 
@@ -346,20 +436,33 @@ export default function Dashboard() {
                       Preview and copy your email
                     </p>
                   </div>
-                  {emailContent && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleCopyToClipboard}
-                      className="shrink-0"
-                    >
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copy to Clipboard
-                    </Button>
-                  )}
+                  <div className="flex gap-2">
+                    {emailContent && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleCopyToClipboard}
+                        className="shrink-0"
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy
+                      </Button>
+                    )}
+                    {emailContent && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setShowReminders(!showReminders)}
+                        className="shrink-0"
+                      >
+                        <Clock className="h-4 w-4 mr-2" />
+                        Reminder
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
-                <ScrollArea className="h-[600px] w-full rounded-md border border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 p-5">
+                <ScrollArea className="h-[500px] w-full rounded-md border border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 p-5">
                   {error ? (
                     <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
                       <AlertCircle className="h-5 w-5" />
@@ -377,6 +480,30 @@ export default function Dashboard() {
                     </div>
                   )}
                 </ScrollArea>
+                
+                {/* Tone Analyzer */}
+                {emailContent && (
+                  <ToneAnalyzer 
+                    content={emailContent} 
+                    onSuggestionApply={handleApplySuggestion}
+                    onTokenUsage={handleTokenUsageUpdate}
+                  />
+                )}
+                
+                {/* Follow-up Reminder */}
+                {showReminders && (
+                  <Card className="p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <FollowUpReminder 
+                      emailSubject={formData.subject}
+                      recipient={formData.receiver}
+                      onReminderSet={(reminder) => {
+                        // Handle reminder setting
+                        console.log('Reminder set:', reminder);
+                        setShowReminders(false);
+                      }}
+                    />
+                  </Card>
+                )}
               </div>
             </Card>
           </div>

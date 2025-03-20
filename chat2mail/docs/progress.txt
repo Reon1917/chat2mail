@@ -480,6 +480,38 @@ High-Priority TODOs (2025-03-20)
     - Notification system
     - Batch operations
 
+Innovative Features (2025-03-20)
+---------------------------
+[ ] Smart Email Templates with Variables
+    - JSON-based template system with variable placeholders
+    - Template categories (business, personal, follow-up)
+    - User-created custom templates
+
+[ ] Email Tone Analyzer & Adjuster
+    - Sentiment analysis with Gemini AI
+    - Tone suggestions (formal, friendly, assertive)
+    - Real-time feedback during composition
+
+[ ] Follow-up Reminders
+    - Timer-based notification system
+    - Custom follow-up intervals
+    - Auto-generated follow-up drafts
+
+[ ] Email Signature Generator
+    - HTML/CSS template library
+    - Dynamic fields (name, title, contact info)
+    - Social media integration
+
+[ ] Voice-to-Email Dictation
+    - Browser's built-in speech recognition
+    - Real-time transcription
+    - Command support for formatting
+
+[ ] Smart Reply Suggestions
+    - Context-aware quick replies
+    - Personalized response options
+    - One-click insertion
+
 Feature Suggestions
 ----------------
 1. Smart Filters
