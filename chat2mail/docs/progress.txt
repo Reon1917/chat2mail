@@ -438,3 +438,45 @@ You can obtain a Gemini API key from the Google AI Studio (https://makersuite.go
    - Consider performance implications of template processing
    - Design database schema to support future template features
    - Implement proper validation for template inputs
+
+High-Priority TODOs (2025-03-20)
+---------------------------
+[ ] Email Integration
+    - IMAP/SMTP service setup
+    - Multi-account support
+    - Real-time email monitoring
+    - Secure credential storage
+
+[ ] AI Features
+    - Email summarization
+    - Smart reply suggestions
+    - Auto-categorization
+    - Sentiment analysis
+
+[ ] User Experience
+    - Email thread visualization
+    - Quick action shortcuts
+    - Notification system
+    - Batch operations
+
+Feature Suggestions
+----------------
+1. Smart Filters
+   - AI-powered email categorization
+   - Custom rule creation
+   - Priority inbox
+
+2. Time Management
+   - Schedule send
+   - Follow-up reminders
+   - Meeting scheduler
+
+3. Analytics
+   - Response time metrics
+   - Email volume trends
+   - Communication patterns
+
+4. Collaboration
+   - Shared inboxes
+   - Team assignments
+   - Comment system
