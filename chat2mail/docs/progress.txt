@@ -439,6 +439,27 @@ You can obtain a Gemini API key from the Google AI Studio (https://makersuite.go
    - Design database schema to support future template features
    - Implement proper validation for template inputs
 
+Landing Page Updates (2025-03-20)
+-----------------------------
+[X] Simplified landing page approach
+    - Removed 3D elements and complex animations
+    - Using actual dashboard components as mockups
+    - Focus on real functionality preview
+
+[ ] Landing Page Components
+    - Hero section with feature preview
+    - Dashboard mockup showcase
+    - Feature highlights with screenshots
+    - Simple, clean animations
+    - Mobile-responsive design
+
+[ ] Visual Improvements
+    - Add actual dashboard screenshots
+    - Implement gradient backgrounds
+    - Optimize for performance
+    - Add loading states
+    - Improve responsive layout
+
 High-Priority TODOs (2025-03-20)
 ---------------------------
 [ ] Email Integration

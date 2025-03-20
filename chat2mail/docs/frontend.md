@@ -19,8 +19,11 @@
 app/
 ├── (auth)/         # Authentication related routes
 ├── dashboard/      # Main dashboard pages
+├── components/     # Reusable UI components
+│   ├── ui/        # Shadcn components
+│   ├── email/     # Email-related components
+│   └── landing/   # Landing page components
 ├── api/           # API routes
-├── components/    # Reusable UI components
 └── lib/          # Utility functions and configurations
 ```
 
@@ -29,6 +32,20 @@ app/
 - React Context for theme/auth state
 - Server Actions for mutations
 
+## Landing Page Components
+- Uses actual dashboard components as mockups
+- Simplified preview sections
+- Feature showcase with screenshots
+- Clean, modern design without 3D effects
+- Performance-focused animations
+
 ## API Integration
 - REST endpoints for email operations
 - WebSocket for real-time updates
+
+## Design System
+- Shadcn/ui for consistent UI
+- Dark/light theme support
+- Responsive breakpoints
+- Custom color schemes
+- Modern gradient effects
