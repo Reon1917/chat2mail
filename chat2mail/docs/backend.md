@@ -1,10 +1,10 @@
 # Backend Technical Documentation
 
 ## Tech Stack
-- Node.js
-- Express.js
+- NextJS
+- TypeScript
 - PostgreSQL
-- Prisma ORM
+- Drizzle ORM
 - IMAP/SMTP Integration
 
 ## Core Components
