@@ -1,7 +1,7 @@
 # Frontend Technical Documentation
 
 ## Tech Stack
-- Next.js 14 (App Router)
+- Next.js 15.2.1 (App Router)
 - TypeScript
 - Tailwind CSS
 - Shadcn/ui Components
