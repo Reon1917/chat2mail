@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Initialize the model
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
     // Create prompt for tone analysis
     const prompt = `

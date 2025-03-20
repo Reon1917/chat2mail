@@ -1,0 +1,17 @@
+# Database
+DATABASE_URL="postgresql://username:password@host.region.provider.com/dbname?sslmode=require"
+
+# Google OAuth
+GOOGLE_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_SECRET=your-google-client-secret
+
+# Gemini AI
+GEMINI_API_KEY="your-gemini-api-key"
+
+# Next Auth
+# Generate a secret with: openssl rand -base64 32
+NEXTAUTH_SECRET="your-nextauth-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Node environment
+NODE_ENV="development" # or "production" for production environments
