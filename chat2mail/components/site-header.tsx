@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Mail, User, LogOut, LogIn, Home, LayoutDashboard } from "lucide-react";
+import { Mail, LogOut, LogIn, Home, LayoutDashboard } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -19,11 +18,16 @@ export function SiteHeader() {
   const pathname = usePathname();
   const isLoading = status === "loading";
   
-  // Get first name only for display
+  // Simplified display name function
   const getDisplayName = () => {
-    if (!session?.user?.name) return null;
-    // Only show first name for display in the button
-    return session.user.name.split(' ')[0]; 
+    if (!session?.user?.name) {
+      return session?.user?.email?.split('@')[0] || "User";
+    }
+    
+    // Just return the full name with proper capitalization
+    return session.user.name.split(' ')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
   };
   
   return (
@@ -64,50 +68,15 @@ export function SiteHeader() {
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size="sm" 
-                  className="rounded-full px-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/40 dark:to-purple-900/40 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/60 dark:hover:to-purple-900/60 min-w-[40px] flex justify-start"
+                  size="sm"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
                 >
-                  {session.user?.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "User"} 
-                      className="h-6 w-6 rounded-full object-cover mr-2 flex-shrink-0"
-                    />
-                  ) : (
-                    <User className="h-4 w-4 mr-2 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-                  )}
-                  <span className="font-medium text-sm text-gray-800 dark:text-gray-200 max-w-[120px] truncate overflow-hidden">
-                    {getDisplayName() || session.user?.email?.split('@')[0] || "User"}
-                  </span>
+                  {getDisplayName()}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 border-indigo-100 dark:border-indigo-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    {session.user?.name && (
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{session.user.name}</p>
-                    )}
-                    {session.user?.email && (
-                      <p className="w-[200px] truncate text-sm text-gray-500 dark:text-gray-400">
-                        {session.user.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <DropdownMenuSeparator className="bg-indigo-100 dark:bg-indigo-800" />
-                <DropdownMenuItem asChild className="text-gray-700 dark:text-gray-300 focus:bg-indigo-50 dark:focus:bg-indigo-900/50 focus:text-indigo-700 dark:focus:text-indigo-300">
-                  <Link href="/profile" className="w-full cursor-pointer">
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="text-gray-700 dark:text-gray-300 focus:bg-indigo-50 dark:focus:bg-indigo-900/50 focus:text-indigo-700 dark:focus:text-indigo-300">
-                  <Link href="/settings" className="w-full cursor-pointer">
-                    Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-indigo-100 dark:bg-indigo-800" />
+              <DropdownMenuContent align="end" className="w-40 border-indigo-100 dark:border-indigo-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur">
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-500 focus:bg-red-50 dark:focus:bg-red-900/30 focus:text-red-600 dark:focus:text-red-400"
+                  className="cursor-pointer flex items-center text-red-500 focus:bg-red-50 dark:focus:bg-red-900/30 focus:text-red-600 dark:focus:text-red-400"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

@@ -290,3 +290,193 @@ You can obtain a Gemini API key from the Google AI Studio (https://makersuite.go
 3. Create a `.env.local` file in the root of your project
 4. Add the GEMINI_API_KEY variable with your API key
 5. Restart your development server
+
+## March 11, 2025 - User Profile Display and Token Usage Metrics
+
+### Implemented Features
+
+1. **Enhanced User Profile Display**:
+   - Improved the user name handling in the site header to properly format and display names in various formats
+   - Added better capitalization and formatting for user names in the dropdown menu
+   - Fixed issues with displaying full names that were in incorrect formats
+   - Added truncation to prevent overflow of long names
+
+2. **Token Usage Metrics**:
+   - Created a modular `TokenUsageDisplay` component to visualize token usage metrics
+   - Updated the API route to track and return token usage data from Gemini AI
+   - Implemented input, output, and total token count display with a progress bar
+   - Added tooltips to explain token usage to users
+   - Made the token metrics display conditionally visible and easily removable
+
+### Technical Implementation Details
+
+1. **User Profile Display**:
+   - Enhanced the `getDisplayName` function to handle different name formats (first last, first middle last, etc.)
+   - Added a `formatFullName` function to properly capitalize each word in the user's name
+   - Added truncation to prevent UI issues with very long names
+
+2. **Token Usage Metrics**:
+   - Created a reusable `TokenUsageDisplay` component that can be easily integrated or removed
+   - Added token usage tracking in the `/api/generate-email` API route
+   - Implemented proper error handling and fallback for token metrics when the AI service is unavailable
+   - Used Tailwind CSS for styling to maintain consistency with the rest of the application
+
+### Next Steps
+
+1. **User Profile Enhancements**:
+   - Add ability for users to edit their profile information
+   - Implement profile picture upload functionality
+   - Add name format validation during registration
+
+2. **Token Usage Analytics**:
+   - Implement server-side storage of token usage for analytics
+   - Add a dashboard for admins to monitor overall token usage
+   - Implement user-specific token limits and quotas
+
+3. **Email Generation Improvements**:
+   - Add more customization options for email generation
+   - Implement email templates for common scenarios
+   - Add ability to save and reuse generated emails
+
+### Bug Fixes
+
+1. Fixed user profile display issues in the site header
+2. Resolved issues with improperly formatted names being displayed incorrectly
+3. Fixed import errors in the token usage display component
+
+## March 11, 2025 - Continued Improvements and Email Templates Planning
+
+### Recent Improvements
+
+1. **User Profile Display Fixes**:
+   - Simplified the user profile button in the site header for better visual appearance
+   - Fixed capitalization of user names in the dropdown menu
+   - Improved avatar display and fallback for users without profile images
+   - Enhanced the dropdown menu layout for better readability
+
+2. **Token Usage Metrics**:
+   - Implemented fallback token count estimation when the Gemini API doesn't return token counts
+   - Added detailed logging to help debug token usage data
+   - Simplified the token usage display by removing the 32k limit reference
+   - Updated the progress bar to use a gradient design for better visual appeal
+
+### Email Templates Implementation Planning
+
+#### Approach 1: Basic Template Selection (Simple)
+
+**Implementation**:
+- Create a set of predefined email templates for common scenarios (e.g., job application, meeting request, thank you note)
+- Add a template selection dropdown to the email generation form
+- When a template is selected, prefill the subject and additional context fields
+- Use the selected template as a prompt modifier for the AI generation
+
+**Components Needed**:
+- `EmailTemplateSelector` component with dropdown of available templates
+- `templates.ts` file containing template definitions
+- Updates to the API route to incorporate template information in the prompt
+
+**User Experience**:
+- User selects a template from a dropdown
+- Form fields are prefilled based on the template
+- User can modify the prefilled content before generating the email
+- AI generates an email following the template style
+
+#### Approach 2: Custom Templates with Saving (Intermediate)
+
+**Implementation**:
+- Allow users to save their generated emails as templates
+- Create a template management page where users can view, edit, and delete their templates
+- Implement database storage for user-specific templates
+- Add ability to share templates with other users
+
+**Components Needed**:
+- `SaveAsTemplate` button in the email generation page
+- `TemplateManagementPage` for CRUD operations on templates
+- Database schema updates to store templates
+- API routes for template management
+
+**User Experience**:
+- User generates an email and can save it as a template with a name and category
+- User can browse their saved templates and apply them to new emails
+- User can share templates with colleagues
+
+#### Approach 3: Advanced Template System with Variables (Complex)
+
+**Implementation**:
+- Create a template language with variables (e.g., {{sender}}, {{receiver}}, {{custom_field}})
+- Build a template editor with live preview
+- Allow for conditional sections in templates based on input fields
+- Implement template versioning and analytics
+
+**Components Needed**:
+- Rich template editor with syntax highlighting
+- Template parser to handle variables and conditional logic
+- Template testing tool to validate templates
+- Analytics dashboard for template usage
+
+**User Experience**:
+- Power users can create complex templates with variables and conditional sections
+- Templates can adapt to different scenarios based on input
+- Users can track which templates perform best for different purposes
+
+### Next Steps
+
+1. **Immediate Implementation**:
+   - Start with Approach 1 (Basic Template Selection)
+   - Create 5-10 common email templates for different scenarios
+   - Implement the template selector component
+   - Update the API route to incorporate template guidance
+
+2. **Future Enhancements**:
+   - Add template categories for better organization
+   - Implement user feedback on templates (rating system)
+   - Consider moving to Approach 2 once basic templates are working well
+   - Research user needs for more advanced template features
+
+3. **Technical Considerations**:
+   - Ensure templates work well with the Gemini API
+   - Consider performance implications of template processing
+   - Design database schema to support future template features
+   - Implement proper validation for template inputs
+
+High-Priority TODOs (2025-03-20)
+---------------------------
+[ ] Email Integration
+    - IMAP/SMTP service setup
+    - Multi-account support
+    - Real-time email monitoring
+    - Secure credential storage
+
+[ ] AI Features
+    - Email summarization
+    - Smart reply suggestions
+    - Auto-categorization
+    - Sentiment analysis
+
+[ ] User Experience
+    - Email thread visualization
+    - Quick action shortcuts
+    - Notification system
+    - Batch operations
+
+Feature Suggestions
+----------------
+1. Smart Filters
+   - AI-powered email categorization
+   - Custom rule creation
+   - Priority inbox
+
+2. Time Management
+   - Schedule send
+   - Follow-up reminders
+   - Meeting scheduler
+
+3. Analytics
+   - Response time metrics
+   - Email volume trends
+   - Communication patterns
+
+4. Collaboration
+   - Shared inboxes
+   - Team assignments
+   - Comment system

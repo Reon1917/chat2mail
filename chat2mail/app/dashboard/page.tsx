@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
@@ -8,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Send, Sparkles, Copy, RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
+import { Mail, Send, Sparkles, Copy, RefreshCw, AlertCircle } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { TokenUsageDisplay } from "@/components/token-usage-display";
 
 type FormData = {
   sender: string;
@@ -26,8 +27,14 @@ type FormData = {
   additionalContext: string;
 };
 
+type TokenUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+};
+
 export default function Dashboard() {
-  const { data: session, status } = useSession({
+  const { data: session } = useSession({
     required: true,
     onUnauthenticated() {
       redirect("/login");
@@ -47,9 +54,11 @@ export default function Dashboard() {
     additionalContext: ""
   });
   
-  const [emailContent, setEmailContent] = useState("");
+  const [emailContent, setEmailContent] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tokenUsage, setTokenUsage] = useState<TokenUsage>({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
+  const [showTokenMetrics, setShowTokenMetrics] = useState(false);
 
   // Loading and error states handled by loading.tsx and error.tsx
   if (!session) return null;
@@ -78,12 +87,15 @@ export default function Dashboard() {
       });
       
       const data = await response.json();
+      console.log('API Response:', data); // Debug log to see what's coming back
       
       if (!response.ok) {
         // Handle API errors
         if (data.fallbackEmail) {
           // Use fallback email if available
           setEmailContent(data.fallbackEmail);
+          // Reset token usage when using fallback
+          setTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
           toast({
             title: "Using fallback email template",
             description: data.error || "Could not connect to AI service",
@@ -96,6 +108,13 @@ export default function Dashboard() {
       } else {
         // Set the generated email content
         setEmailContent(data.email);
+        // Update token usage metrics
+        if (data.tokenUsage) {
+          console.log('Token usage data:', data.tokenUsage); // Debug log for token usage
+          setTokenUsage(data.tokenUsage);
+        } else {
+          console.warn('No token usage data in response');
+        }
         toast({
           title: "Email generated successfully",
           description: "Your AI-powered email is ready to use!",
@@ -104,6 +123,8 @@ export default function Dashboard() {
     } catch (err) {
       console.error('Error generating email:', err);
       setError('Failed to generate email. Please try again.');
+      // Reset token usage on error
+      setTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
       toast({
         title: "Error",
         description: "Failed to generate email. Please try again.",
@@ -115,7 +136,7 @@ export default function Dashboard() {
   };
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(emailContent);
+    navigator.clipboard.writeText(emailContent as string);
     toast({
       title: "Copied to clipboard",
       description: "Email content has been copied to your clipboard.",
@@ -127,119 +148,127 @@ export default function Dashboard() {
       <SiteHeader />
       
       {/* Main Content */}
-      <main className="container mx-auto p-6 pt-24">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              AI Email Writer
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              Generate professional emails in seconds with our AI assistant
-            </p>
+      <main className="container mx-auto px-4 md:px-6 py-6 md:py-8 mt-16">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header with Avatar */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="rounded-lg bg-white/90 dark:bg-gray-800/90 p-2.5 shadow-sm">
+              <Mail className="h-6 w-6 text-indigo-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+                Email Writer
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                Craft the perfect email in seconds
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Email Form */}
-            <Card className="p-6 border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="sender" className="text-indigo-700 dark:text-indigo-300 font-medium">
-                      Sender Name
-                    </Label>
+            {/* Form Card */}
+            <Card className="border border-gray-100 dark:border-gray-800 shadow-lg bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+              <div className="p-6 md:p-8 space-y-6">
+                {/* Sender Info */}
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                    <Mail className="h-4 w-4" />
+                    From
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="sender">Your Name</Label>
+                      <Input 
+                        id="sender" 
+                        name="sender" 
+                        placeholder="Enter your name"
+                        value={formData.sender}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="senderTitle">Your Role</Label>
+                      <Input 
+                        id="senderTitle" 
+                        name="senderTitle" 
+                        placeholder="e.g. Marketing Manager"
+                        value={formData.senderTitle}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-2" />
+
+                {/* Receiver Info */}
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-purple-400">
+                    <Send className="h-4 w-4" />
+                    To
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="receiver">Recipient Name</Label>
+                      <Input 
+                        id="receiver" 
+                        name="receiver" 
+                        placeholder="Enter recipient's name"
+                        value={formData.receiver}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="receiverTitle">Recipient Role</Label>
+                      <Input 
+                        id="receiverTitle" 
+                        name="receiverTitle" 
+                        placeholder="e.g. Project Lead"
+                        value={formData.receiverTitle}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-2" />
+
+                {/* Email Content */}
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="subject">Email Subject</Label>
                     <Input 
-                      id="sender" 
-                      name="sender" 
-                      placeholder="Your name"
-                      value={formData.sender}
+                      id="subject" 
+                      name="subject" 
+                      placeholder="What's your email about?"
+                      value={formData.subject}
                       onChange={handleInputChange}
-                      className="border-indigo-200 focus:border-indigo-400 dark:border-indigo-800 dark:focus:border-indigo-600"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="senderTitle" className="text-indigo-700 dark:text-indigo-300 font-medium">
-                      Sender Title
-                    </Label>
-                    <Input 
-                      id="senderTitle" 
-                      name="senderTitle" 
-                      placeholder="Your position/title"
-                      value={formData.senderTitle}
+
+                  <div className="space-y-3">
+                    <Label htmlFor="additionalContext">Key Points</Label>
+                    <Textarea 
+                      id="additionalContext" 
+                      name="additionalContext" 
+                      placeholder="Add the main points you want to convey..."
+                      value={formData.additionalContext}
                       onChange={handleInputChange}
-                      className="border-indigo-200 focus:border-indigo-400 dark:border-indigo-800 dark:focus:border-indigo-600"
+                      className="min-h-[120px] resize-y"
                     />
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="receiver" className="text-purple-700 dark:text-purple-300 font-medium">
-                      Receiver Name
-                    </Label>
-                    <Input 
-                      id="receiver" 
-                      name="receiver" 
-                      placeholder="Recipient's name"
-                      value={formData.receiver}
-                      onChange={handleInputChange}
-                      className="border-purple-200 focus:border-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="receiverTitle" className="text-purple-700 dark:text-purple-300 font-medium">
-                      Receiver Title
-                    </Label>
-                    <Input 
-                      id="receiverTitle" 
-                      name="receiverTitle" 
-                      placeholder="Recipient's position/title"
-                      value={formData.receiverTitle}
-                      onChange={handleInputChange}
-                      className="border-purple-200 focus:border-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-pink-700 dark:text-pink-300 font-medium">
-                    Email Subject
-                  </Label>
-                  <Input 
-                    id="subject" 
-                    name="subject" 
-                    placeholder="Tell us about the email..."
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    className="border-pink-200 focus:border-pink-400 dark:border-pink-800 dark:focus:border-pink-600"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="additionalContext" className="text-pink-700 dark:text-pink-300 font-medium">
-                    Additional Context
-                  </Label>
-                  <Textarea 
-                    id="additionalContext" 
-                    name="additionalContext" 
-                    placeholder="Add any additional details or context for the email..."
-                    value={formData.additionalContext}
-                    onChange={handleInputChange}
-                    className="min-h-[80px] border-pink-200 focus:border-pink-400 dark:border-pink-800 dark:focus:border-pink-600"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="tone" className="text-indigo-700 dark:text-indigo-300 font-medium">
-                      Tone
-                    </Label>
+
+                {/* Email Style */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="tone">Writing Style</Label>
                     <select
                       id="tone"
                       name="tone"
                       value={formData.tone}
                       onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-indigo-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus-visible:ring-indigo-600"
+                      className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="professional">Professional</option>
                       <option value="formal">Formal</option>
@@ -247,96 +276,108 @@ export default function Dashboard() {
                       <option value="friendly">Friendly</option>
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="length" className="text-purple-700 dark:text-purple-300 font-medium">
-                      Length
-                    </Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="length">Email Length</Label>
                     <select
                       id="length"
                       name="length"
                       value={formData.length}
                       onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-purple-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus-visible:ring-purple-600"
+                      className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="short">Short</option>
-                      <option value="medium">Medium</option>
-                      <option value="long">Long</option>
+                      <option value="short">Brief (1-2 paragraphs)</option>
+                      <option value="medium">Standard (2-3 paragraphs)</option>
+                      <option value="long">Detailed (3+ paragraphs)</option>
                     </select>
                   </div>
                 </div>
-                
+
                 <Button 
                   onClick={handleGenerateEmail} 
                   disabled={isGenerating || !formData.subject || !formData.sender || !formData.receiver}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white h-11 text-base"
                 >
                   {isGenerating ? (
                     <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
+                      <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+                      Writing your email...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Email with Gemini AI
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Write Email
                     </>
                   )}
                 </Button>
-              </div>
-            </Card>
-            
-            {/* Email Preview */}
-            <Card className="p-6 border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Generated Email
-                </h3>
-                {emailContent && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleCopyToClipboard}
-                    className="border-purple-200 hover:border-purple-400 dark:border-purple-800 dark:hover:border-purple-600"
-                  >
-                    <Copy className="h-4 w-4 mr-1" />
-                    Copy
-                  </Button>
+
+                {tokenUsage.totalTokens > 0 && (
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setShowTokenMetrics(prev => !prev)}
+                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        {showTokenMetrics ? "Hide Usage Stats" : "Show Usage Stats"}
+                      </Button>
+                    </div>
+                    {showTokenMetrics && (
+                      <TokenUsageDisplay 
+                        inputTokens={tokenUsage.inputTokens}
+                        outputTokens={tokenUsage.outputTokens}
+                        totalTokens={tokenUsage.totalTokens}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
-              
-              <ScrollArea className="h-[500px] rounded-md border border-purple-100 dark:border-purple-900 p-4 bg-white dark:bg-gray-900">
-                {emailContent ? (
-                  <pre className="whitespace-pre-wrap font-sans text-gray-800 dark:text-gray-200">
-                    {emailContent}
-                  </pre>
-                ) : error ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6">
-                    <AlertCircle className="h-16 w-16 text-red-300 dark:text-red-700 mb-4" />
-                    <p className="text-red-500 dark:text-red-400 font-medium">
-                      {error}
+            </Card>
+
+            {/* Generated Email Card */}
+            <Card className="border border-gray-100 dark:border-gray-800 shadow-lg bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+              <div className="p-6 md:p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300">
+                      Your Email
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Preview and copy your email
                     </p>
+                  </div>
+                  {emailContent && (
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => setError(null)}
-                      className="mt-4 border-red-200 hover:border-red-400 dark:border-red-800 dark:hover:border-red-600"
+                      onClick={handleCopyToClipboard}
+                      className="shrink-0"
                     >
-                      Dismiss
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy to Clipboard
                     </Button>
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6">
-                    <Mail className="h-16 w-16 text-purple-300 dark:text-purple-700 mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Fill in the form and click "Generate Email" to create your AI-powered email
-                    </p>
-                    <div className="mt-4 flex items-center text-sm text-purple-500 dark:text-purple-400">
-                      <ArrowRight className="h-4 w-4 mr-1" />
-                      <span>Powered by Gemini Flash 2.0</span>
+                  )}
+                </div>
+
+                <ScrollArea className="h-[600px] w-full rounded-md border border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 p-5">
+                  {error ? (
+                    <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                      <AlertCircle className="h-5 w-5" />
+                      <p>{error}</p>
                     </div>
-                  </div>
-                )}
-              </ScrollArea>
+                  ) : emailContent ? (
+                    <div className="prose prose-indigo dark:prose-invert max-w-none">
+                      <div className="whitespace-pre-wrap text-base leading-relaxed">{emailContent}</div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400">
+                      <Mail className="h-12 w-12 mb-4 text-indigo-300 dark:text-indigo-700" />
+                      <p className="text-base">Fill in the details and click &quot;Write Email&quot; to create your message</p>
+                      <p className="text-sm mt-2 text-gray-400">Our AI will help you craft the perfect email</p>
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
             </Card>
           </div>
         </div>
